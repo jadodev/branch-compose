@@ -1,26 +1,44 @@
-# docker-compose.yml (parte modificada)
+version: '3.8'
+
 services:
   postgres:
+    image: postgres:15  # ¡ESTA LÍNEA FALTABA!
+    container_name: postgres_db_2
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
       POSTGRES_DB: postgres
-      POSTGRES_HOST_AUTH_METHOD: md5  # Fuerza autenticación por password
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5433:5432"
-    networks:
-      - branch_net  # Red renombrada
-
-  app:
-    environment:
-      DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
       - branch_net
+
+  app:
+    build: .  # Asegúrate de tener Dockerfile en tu directorio
+    container_name: nestjs_app
     depends_on:
       postgres:
         condition: service_healthy
+    environment:
+      DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
+    ports:
+      - "3001:3001"
+    networks:
+      - branch_net
+    command: [ "sh", "-c", "sleep 5 && cd /app && pnpm start:dev"]
+
+volumes:
+  postgres_data:
 
 networks:
   branch_net:
-    name: branch_compose_network  # Nombre único explícito
+    name: branch_compose_network
     driver: bridge
