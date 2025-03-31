@@ -29,8 +29,7 @@ services:
       - "3001:3001"
     volumes:
       - crud-store:/app
-      - /app/node_modules
-    command: ["pnpm", "run", "start"]
+    command: [ "sh", "-c", "cd /app && pnpm start:dev"]
 
 volumes:
   postgres_data:
