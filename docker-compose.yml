@@ -27,8 +27,6 @@ services:
       DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
     ports:
       - "3001:3001"
-    volumes:
-      - ./crud-store:/app
     command: [ "sh", "-c", "cd /app && pnpm start:dev"]
 
 volumes:
