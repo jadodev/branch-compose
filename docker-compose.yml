@@ -1,39 +1,26 @@
-version: '3.8'
-
+# docker-compose.yml (parte modificada)
 services:
   postgres:
-    image: postgres:15
-    container_name: postgres_db_2
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
       POSTGRES_DB: postgres
+      POSTGRES_HOST_AUTH_METHOD: md5  # Fuerza autenticación por password
     ports:
-      - "5433:5432"  # Mapea al puerto 5433 en el host
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - "5433:5432"
     networks:
-      my_network:
-        aliases:
-          - db  # Alias adicional para mayor claridad
+      - branch_net  # Red renombrada
 
   app:
-    build: .
-    container_name: nestjs_app
-    depends_on:
-      - postgres
     environment:
-      DATABASE_URL: "postgres://postgres:root@db:5432/postgres"  # Usa el alias
-    ports:
-      - "3001:3001"
+      DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
     networks:
-      - my_network
-    command: [ "sh", "-c", "sleep 10 && cd /app && pnpm start:dev"]  # Espera 10s
+      - branch_net
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 networks:
-  my_network:
+  branch_net:
+    name: branch_compose_network  # Nombre único explícito
     driver: bridge
-    name: my_custom_network  # Nombre explícito
-
-volumes:
-  postgres_data:
