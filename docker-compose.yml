@@ -4,7 +4,6 @@ services:
   postgres:
     image: postgres:15
     container_name: postgres_db_2
-    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: root
@@ -13,31 +12,31 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:  # 🔹 Añade esta sección
+    healthcheck:  # Añade healthcheck
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
       - my_network
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: nestjs_app
-    restart: always
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
     ports:
       - "3001:3001"
-    networks:  # 🔹 Añade esta sección
+    networks:
       - my_network
     command: [ "sh", "-c", "cd /app && pnpm start:dev"]
 
 volumes:
   postgres_data:
-    driver: local
-    
-networks:  # 🔹 Define la red
+
+networks:
   my_network:
     driver: bridge
-
