@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15  # ¡ESTA LÍNEA FALTABA!
+    image: postgres:15
     container_name: postgres_db_2
     environment:
       POSTGRES_USER: postgres
@@ -18,27 +18,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-    networks:
-      - branch_net
-
-  app:
-    build: .  # Asegúrate de tener Dockerfile en tu directorio
-    container_name: nestjs_app
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      DATABASE_URL: "postgres://postgres:root@postgres:5432/postgres"
-    ports:
-      - "3001:3001"
-    networks:
-      - branch_net
-    command: [ "sh", "-c", "sleep 5 && cd /app && pnpm start:dev"]
 
 volumes:
   postgres_data:
-
-networks:
-  branch_net:
-    name: branch_compose_network
-    driver: bridge
