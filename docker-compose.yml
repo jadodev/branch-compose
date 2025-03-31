@@ -28,9 +28,10 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - crud-store:/app
+      - ./crud-store:/app
     command: [ "sh", "-c", "cd /app && pnpm start:dev"]
 
 volumes:
   postgres_data:
     driver: local
+
