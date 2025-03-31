@@ -28,7 +28,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - /crud-store:/app
+      - crud-store:/app
       - /app/node_modules
     command: ["pnpm", "run", "start"]
 
